@@ -55,7 +55,7 @@ def process_pdf_with_processor(
 
 
 
-def translate_text(target_language: str, text: str,  filename: str, folder: str = "processed_files",):
+def translate_text(target_language: str, text: str,  filename: str, folder: str = "processed_files"):
     
     from google.cloud import translate_v2
 
