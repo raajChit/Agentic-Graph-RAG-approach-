@@ -9,6 +9,7 @@ from datetime import datetime
 from langchain_openai import ChatOpenAI
 from prompts import query_agent_prompt, orchestrator_agent_prompt, human_handoff_agent_prompt
 from schemas import query_agent_schema, orchestrator_agent_schema
+from langchain_core.messages import HumanMessage, AIMessage
 import sys
 import os
 from pydantic import BaseModel, Field
@@ -34,45 +35,58 @@ def agent_process(prompt, chat_history):
     start_time = datetime.now()
 
     query_agent_result, language = query_agent(llm=llm_70b, prompt=prompt, system_prompt=query_agent_prompt,chat_history=chat_history)
+    print(f'\n\nQuery Agent result...\n{query_agent_result}')
     if query_agent_result['greeting'] != '':
         
         translate_result, language_2 = translate_text(language, query_agent_result['greeting'])
         print(f"\n{translate_result}")
+        latest_chat_history = [HumanMessage(content=prompt), AIMessage(content=translate_result)]
+        chat_history.extend(latest_chat_history)
         end_time = datetime.now()
         print("\n\nduration for query", end_time - start_time)
         return translate_result
 
     orchestrator_agent_result = orchestrator_agent(llm=llm_70b, prompt=query_agent_result['action'], system_prompt=orchestrator_agent_prompt,chat_history=chat_history)
+    print(f'\n\nOrchestrator Agent result...\n{orchestrator_agent_result}')
+
     if orchestrator_agent_result["agent_to_call"] == "human_handoff_agent":
-        human_handoff_agent_result = human_handoff_agent(llm=llm_70b, prompt=orchestrator_agent_result["handoff_information"], system_prompt=human_handoff_agent_prompt)
+        human_handoff_agent_result = human_handoff_agent(llm=llm_8b, prompt=orchestrator_agent_result["handoff_information"], system_prompt=human_handoff_agent_prompt,chat_history=chat_history)
         
         translate_result, language_2 = translate_text(language, human_handoff_agent_result.content)
         print(f'\n\nHuman handoff Agent result...\n{translate_result}')
+
+        latest_chat_history = [HumanMessage(content=prompt), AIMessage(content=translate_result)]
+        chat_history.extend(latest_chat_history)
         end_time = datetime.now()
         print("\n\nduration for query", end_time - start_time)
         return translate_result
     
     document_agent_result = document_agent(prompt)
+    print(f'\n\nDocument Agent result...\n{document_agent_result}')
     if document_agent_result["agent_to_call"] == "human_handoff_agent":
-        human_handoff_agent_result = human_handoff_agent(llm=llm_70b, prompt=document_agent_result["content"], system_prompt=human_handoff_agent_prompt,chat_history=chat_history)
+        human_handoff_agent_result = human_handoff_agent(llm=llm_8b, prompt=document_agent_result["content"], system_prompt=human_handoff_agent_prompt)
         translate_result, language_2 = translate_text(language, human_handoff_agent_result.content)
+
+        latest_chat_history = [HumanMessage(content=prompt), AIMessage(content=translate_result)]
+        chat_history.extend(latest_chat_history)
+
         print(f'\n\nHuman handoff Agent result...\n{translate_result}')
         end_time = datetime.now()
         print("\n\nduration for query", end_time - start_time)
         return translate_result
     
     response_agent_result = response_agent(llm=llm_8b, prompt=query_agent_result['action'],context=document_agent_result["content"])
-
-    translate_result, language_2 = translate_text(language, response_agent_result)
-    
-    print(f'\n\nQuery Agent result...\n{query_agent_result}')
-    print(f'\n\nOrchestrator Agent result...\n{orchestrator_agent_result}')
-    print(f'\n\nDocument Agent result...\n{document_agent_result}')
     print(f'\n\nResponse Agent result...\n{response_agent_result}')
+    translate_result, language_2 = translate_text(language, response_agent_result)
 
+    latest_chat_history = [HumanMessage(content=prompt), AIMessage(content=translate_result)]
+    chat_history.extend(latest_chat_history)
+    
     end_time = datetime.now()
     print("\n\nduration for query", end_time - start_time)
     return translate_result
+
+
 
 
 
@@ -81,9 +95,9 @@ def query_agent(llm, prompt, system_prompt, chat_history):
     translated_prompt, language = translate_text('en', prompt)
     return agent_executor(llm, translated_prompt, system_prompt, chat_history, schema=query_agent_schema), language
 def orchestrator_agent(llm, prompt, system_prompt, chat_history):
-    return agent_executor(llm, prompt, system_prompt, chat_history, orchestrator_agent_schema)
+    return agent_executor(llm, prompt, system_prompt, chat_history, schema=orchestrator_agent_schema)
     
-def human_handoff_agent(llm, prompt, system_prompt, chat_history):
+def human_handoff_agent(llm, prompt, system_prompt,chat_history):
     return agent_executor(llm, prompt, system_prompt, chat_history)
 
 def document_agent(prompt):
@@ -124,7 +138,9 @@ def response_agent(llm, prompt, context):
 
     return chain.invoke({"context": context, "question": prompt})
 
-def agent_executor(llm, prompt, system_prompt, chat_history=[], schema=""):
+def agent_executor(llm, prompt, system_prompt, chat_history=None, schema=""):
+    if chat_history is None:
+        chat_history = []
     template = ChatPromptTemplate.from_messages([
             ("system", system_prompt),
             MessagesPlaceholder(variable_name="chat_history"),
@@ -174,7 +190,4 @@ def translate_text(target_language: str, text: str):
         result = text
     return result, source_lang
 
-prompt = "tell me about EOD policy"
-chat_history = []
-agent_process(prompt, chat_history)
 

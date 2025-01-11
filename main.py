@@ -3,6 +3,7 @@ from typing import List
 from fastapi import FastAPI, File, UploadFile
 from parsing import parse_and_translate_pdf
 from indexing import index_files
+from agent_process import agent_process
 import config
 import uvicorn
 import shutil
@@ -38,6 +39,16 @@ async def upload_pdf(files: List[UploadFile] = File(...), target_language: str =
     except Exception as e:
         raise e
     
+chat_history=[]
+@app.post("/ask")
+async def ask_question(request: str):
+    try:
+        result = agent_process(request, chat_history)
+        return result
+    except Exception as e:
+        raise e
+    
+
 if __name__ == "__main__":
     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
 

@@ -22,7 +22,7 @@ orchestrator_agent_schema = {
     "properties": {
         "agent_to_call": {
             "type": "string",
-            "description": "mention which agents needs to be called (document_agent or human_handoff_agent)",
+            "description": "mention which agents needs to be called - document_agent or human_handoff_agent",
         },
         "handoff_information": {
             "type": "string",

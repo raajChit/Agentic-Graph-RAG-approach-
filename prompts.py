@@ -38,10 +38,10 @@ query_agent_prompt = f"""You are the Query Agent.
 
                         You have to return a json contain two keys
 
-                        greeting key - In the greeting key add in the response if the user is greeting you.
+                        greeting key - In the greeting key add in the response if the user is greeting you or asking you a generic question.
                         action key - mention what the user's question is and identify wether it falls under a knowledge base request, sensitive/personal topic or a complex query. 
 
-                        REMEMBER - while explaining the user's question in the action key, make sure to reframe it in short and concise manner using the chat history assuming the chat history is present. 
+                        REMEMBER, while explaining the user's question in the action key, make sure to reframe it in short and concise manner using the chat history assuming the chat history is present. 
                         """
 
 orchestrator_agent_prompt = f"""You are the Orchestrator Agent, responsible for efficiently routing user queries based on their intent and content.
@@ -54,7 +54,7 @@ orchestrator_agent_prompt = f"""You are the Orchestrator Agent, responsible for 
                                 
 
                                 You have to return a json contain two keys
-                                agent_to_call - mention which agents needs to be called (document_agent or human_handoff_agent)
+                                agent_to_call - mention which agents needs to be called - document_agent or human_handoff_agent
                                 handoff_information - if the human_handoff_agent is called explain the user request and mention why it requires human handoff. 
                                 
                             """
