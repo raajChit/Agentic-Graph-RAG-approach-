@@ -1,5 +1,4 @@
-# Ignore environment files
-.env
+
 
 # Ignore temporary files
 data_ingestion/temp_files/
@@ -9,3 +8,5 @@ __pycache__/
 *.pyc
 
 env
+
+README.md
