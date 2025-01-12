@@ -31,6 +31,9 @@ llm_70b = ChatGroq(
 llm_8b = ChatGroq(
     model="gemma2-9b-it"
 )
+llm_openai = ChatOpenAI(
+    model = "gpt-4o-mini"
+)
 
 
 def agent_process(prompt, chat_history):
@@ -140,7 +143,7 @@ def document_agent(prompt):
 
 def response_agent(llm, prompt, context):
     graph = Neo4jGraph(url=config.NEO4J_URI, username=config.NEO4J_USERNAME, password=config.NEO4J_PASSWORD)
-    chain = GraphCypherQAChain.from_llm(llm_70b, graph=graph, verbose=True, allow_dangerous_requests=True)
+    chain = GraphCypherQAChain.from_llm(llm_openai, graph=graph, verbose=True, allow_dangerous_requests=True)
 
     relations = chain.invoke({"query": prompt})
 

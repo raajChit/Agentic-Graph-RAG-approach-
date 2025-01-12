@@ -25,7 +25,8 @@ query_agent_prompt = f"""You are the Query Agent.
                         Scenarios where the query or request may require:
                         Sophisticated analysis: Multiple contextual factors must be weighed, or there are competing pieces of evidence/information.
                         Contextual interpretation: The correct response depends on information that isnt easily captured by rules or straightforward data lookups (e.g., legal, ethical, or policy implications).
-                        Situational nuances: The query has gray areas or potentially far-reaching consequences, making it more prudent to have human oversight.
+                        Situational nuances: The query has gray areas or potentially far-reaching consequences, making it more prudent to have human oversight. 
+                        If you are told to recommend something or propose something, it is a complex query.
  
                         
                         
