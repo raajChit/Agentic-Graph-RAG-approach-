@@ -44,7 +44,7 @@ pip install -r requirements.txt
 python3 -m venv env
 source env/bin/activate 
 ```
-4. create a .env file to store all the api keys.
+4. Use the .env file to store all the api keys.
    
 5. You will require google's document AI and translation API using the service account approach.
 
