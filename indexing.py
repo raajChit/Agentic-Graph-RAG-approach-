@@ -2,13 +2,14 @@ from langchain_pinecone import PineconeVectorStore
 from langchain_openai import OpenAIEmbeddings
 from langchain.document_loaders import DirectoryLoader, TextLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-import openai
 import config
-
-# Set your API keys for OpenAI
-openai.api_key = config.OPENAI_API_KEY
+from langchain_neo4j import Neo4jGraph
+from langchain_openai import ChatOpenAI
+from langchain_openai import ChatOpenAI
+from langchain_experimental.graph_transformers import LLMGraphTransformer
 
 def index_files():
+    print("\n\nIndexing....")
     # Initialize OpenAI Embeddings using LangChain
     embeddings = OpenAIEmbeddings(model="text-embedding-ada-002")  # Specify which embedding model
 
@@ -25,6 +26,23 @@ def index_files():
     # Add all the split documents into the Pinecone vector database
     pinecone_index_name = "real-estate-docs"
     vectorstore = PineconeVectorStore(index_name=pinecone_index_name, embedding=embeddings, namespace="circulars")
-    vectorstore.add_documents(documents=split_documents )
+    vectorstore.add_documents(documents=split_documents)
 
-    print("Embeddings from text files residing in the directory, created, and inserted in Pinecone Vector Database successfully!")
+    print("\nSUCCESS:Embeddings from text files residing in the directory, created, and inserted in Pinecone Vector Database successfully!")
+
+    # Initialize the language model for graph transformation
+    llm=ChatOpenAI(temperature=0, model_name="gpt-4o-mini-2024-07-18", api_key=config.OPENAI_API_KEY)
+
+    # Transform documents into graph format
+    llm_transformer = LLMGraphTransformer(llm=llm)
+    graph_documents = llm_transformer.convert_to_graph_documents(documents)
+
+    # Connect to Neo4j and add graph documents
+    graph = Neo4jGraph(url=config.NEO4J_URI, username=config.NEO4J_USERNAME, password=config.NEO4J_PASSWORD)
+    graph.add_graph_documents(
+        graph_documents,
+        baseEntityLabel=True,
+        include_source=True
+    )
+    print("\nDocuments relationships and hierarchy added to knowledge graph")
+

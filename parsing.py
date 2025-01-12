@@ -1,7 +1,9 @@
 import config
 import os
+from pypdf import PdfReader, PdfWriter
 
 def parse_and_translate_pdf(target_language, read_file_location, write_file_name):
+    # Parse the PDF and translate the extracted text
     parsed_text = process_pdf_with_processor(
         config.PROJECT_ID,
         config.LOCATION,
@@ -43,7 +45,7 @@ def process_pdf_with_processor(
         raw_document=raw_document,
     )
 
-    print("SENDING THE REQUEST")
+    print("\n\nPARSING DOCUMENT")
     # Send the request
     result = client.process_document(request=request)
     document_object = result.document
@@ -85,6 +87,22 @@ def translate_text(target_language: str, text: str,  filename: str, folder: str 
         file.write(result)
    
 
-    print(f"Translation saved to {file_path}")
-    print(f"Detected source language: {source_lang}")
+    print(f"\n\nTranslation saved to {file_path}")
+    print(f"\nDetected source language: {source_lang}")
 
+def split_pdf(file_path, split_folder, max_pages=15):
+
+    reader = PdfReader(file_path)
+    total_pages = len(reader.pages)
+
+    for start in range(0, total_pages, max_pages):
+        writer = PdfWriter()
+        for i in range(start, min(start + max_pages, total_pages)):
+            writer.add_page(reader.pages[i])
+
+        # Save the split file in the split_files folder
+        split_file_path = os.path.join(split_folder, f"{os.path.splitext(os.path.basename(file_path))[0]}_part_{start//max_pages + 1}.pdf")
+        with open(split_file_path, "wb") as output_file:
+            writer.write(output_file)
+
+    print(f"PDF split into {len(os.listdir(split_folder))} parts in '{split_folder}'.")

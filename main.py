@@ -1,7 +1,7 @@
 import os
 from typing import List
 from fastapi import FastAPI, File, UploadFile
-from parsing import parse_and_translate_pdf
+from parsing import parse_and_translate_pdf, split_pdf
 from indexing import index_files
 from agent_process import agent_process
 import config
@@ -15,24 +15,40 @@ app = FastAPI()
 
 @app.post("/uploadpdf")
 async def upload_pdf(files: List[UploadFile] = File(...), target_language: str = "en"):
+    # Create necessary directories for processing
     os.makedirs("temp_files", exist_ok=True)
-
+    os.makedirs("split_files", exist_ok=True)
+    split_folder = "./split_files"
+    temp_folder = "./temp_files"
+    
     try:
         for file in files:
-                file_location = f"./temp_files/{file.filename}"
-                file_name_without_ext = os.path.splitext(file.filename)[0]
-                write_file_name = f"{file_name_without_ext}.txt"
+                file_location = os.path.join(temp_folder, file.filename)
+
                 with open(file_location, "wb") as f:
                     content = await file.read()
                     f.write(content)
+                # Split the PDF into smaller parts
+                split_pdf(file_path=file_location, split_folder=split_folder)
 
-                parse_and_translate_pdf(target_language=target_language,read_file_location=file_location, write_file_name=write_file_name)
+                for split_file in os.listdir(split_folder):
+                    split_file_path = os.path.join(split_folder, split_file)
+                    file_name_without_ext = os.path.splitext(split_file)[0]
+                    write_file_name = f"{file_name_without_ext}.txt"
+
+                    # Run the parse and translate function
+                    parse_and_translate_pdf(target_language=target_language, read_file_location=split_file_path, write_file_name=write_file_name)
+
+                # Index the processed files
                 index_files()
                 
+        # Clean up temporary directories
         shutil.rmtree("temp_files")
         shutil.rmtree("processed_files")
+        shutil.rmtree("split_files")
         os.makedirs("temp_files", exist_ok=True)
         os.makedirs("processed_files", exist_ok=True)
+        os.makedirs("split_files", exist_ok=True)
 
         return {"result":"success", "remarks":"PDF files parsed and indexed"}
             
@@ -40,40 +56,14 @@ async def upload_pdf(files: List[UploadFile] = File(...), target_language: str =
         raise e
     
 chat_history=[]
-@app.post("/ask")
+@app.post("/ask_question")
 async def ask_question(request: str):
+    # Process a question using the agent
     try:
         result = agent_process(request, chat_history)
-        return result
+        return {"result":"success", "content":result}
     except Exception as e:
         raise e
-    
-
-if __name__ == "__main__":
-    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -109,3 +99,6 @@ def read_root():
     }
 
 
+if __name__ == "__main__":
+    # Run the FastAPI application
+    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)

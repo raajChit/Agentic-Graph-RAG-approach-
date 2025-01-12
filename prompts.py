@@ -3,7 +3,7 @@ query_agent_prompt = f"""You are the Query Agent.
                         2. Understand the intent:
                         Determine whether the users message is a
 
-                        greeting: A general greeting from the user. In that case, reply politely to the user in the greetings key
+                        greeting: A general greeting from the user. In that case, reply politely to the user in the greetings key. If the user query is not a greeting. Leave the greeting key empty.
                         
                         knowledge-based request: knowledge base related question. Mostly real estate/construction regulations related. (Like DCPR or MCGM circulars)
                         
