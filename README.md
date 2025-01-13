@@ -56,7 +56,7 @@ source env/bin/activate
 
    Make sure to store the json key in the project directory
 
-5. You will also require Groq and OpenAI keys.
+6. You will also require Groq and OpenAI keys.
    Follow the instructions given in the links to get the keys:
    
    Groq: [https://console.groq.com/docs/quickstart](url)
@@ -72,11 +72,12 @@ source env/bin/activate
     
    
    
-9. Once you have set up all the keys. You can run the main file.
+8. Once you have set up all the keys. You can run the main file.
 ```
 python3 main.py 
 ```
-7. You can access the API endpoints using Fast API swagger by going to the link : [http://127.0.0.1:8000/docs](url) or [http://localhost:8000/docs](url)
+9. You can access the API endpoints using Fast API swagger by going to the link : [http://127.0.0.1:8000/docs](url) or [http://localhost:8000/docs](url)
+
 
 
 
