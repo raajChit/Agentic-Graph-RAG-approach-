@@ -58,11 +58,21 @@ source env/bin/activate
 
 5. You will also require Groq and OpenAI keys.
    Follow the instructions given in the links to get the keys:
+   
    Groq: [https://console.groq.com/docs/quickstart](url)
    
    OpenAI: [https://platform.openai.com/docs/quickstart](url)
+
+7. You will require api keys for Neo4j and Pinecone as well.
+   Follow the instructions given in the links to get the keys:
+
+   Neo4j: [https://neo4j.com](url)
+
+   Pinecone: [https://docs.pinecone.io/reference/api/authentication](url)
+    
    
-6. Once you have set up all the keys. You can run the main file.
+   
+9. Once you have set up all the keys. You can run the main file.
 ```
 python3 main.py 
 ```
