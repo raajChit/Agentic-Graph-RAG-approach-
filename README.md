@@ -16,6 +16,8 @@ PDF Handling: Efficient text extraction and metadata management.
 
 User Interaction: AI-human collaboration for clarity and accuracy.
 
+Multilingual support for conversation as well as uploading pdfs
+
 Applications:
 
 Ideal for legal review, compliance automation, and research data management.
