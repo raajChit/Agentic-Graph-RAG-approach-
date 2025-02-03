@@ -22,11 +22,6 @@ Applications:
 
 Ideal for legal review, compliance automation, and research data management.
 
-## 🚀 Demo
-click on the image to visit the demo video
-
-[![Watch on YouTube](https://img.youtube.com/vi/oMpKkhVB0Eo/hqdefault.jpg)](https://www.youtube.com/watch?v=oMpKkhVB0Eo&t=1s)
-
 
 
 ## 🛠️ Quick Start 
